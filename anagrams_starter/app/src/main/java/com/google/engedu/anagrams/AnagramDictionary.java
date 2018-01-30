@@ -81,16 +81,29 @@ public class AnagramDictionary {
     public List<String> getAnagramsWithOneMoreLetter(String word) {
         ArrayList<String> result = new ArrayList<String>();
 
-        String sortedWord = sortLetters(word);
         for(int i = 0; i < 26; i++) {
             char letter = (char)('a' + i);  // assume small letter word
-            String sortedWordWithOneMoreLetter = sortedWord + letter;
-            result.addAll(lettersToWord.get(sortedWordWithOneMoreLetter));
+            List anagramsForWordWithLetter = getAnagrams(word + letter);
+            if(anagramsForWordWithLetter != null){
+                result.addAll(anagramsForWordWithLetter);
+            }
         }
         return result;
     }
 
     public String pickGoodStarterWord() {
-        return "stop";
+        int length = wordList.size();
+
+        Random rand = new Random();
+
+        int anagramLength = 0;
+        String randomWord = "";
+        while(anagramLength < MIN_NUM_ANAGRAMS) {
+            int index = rand.nextInt(length);
+            randomWord = wordList.get(index);
+            anagramLength = lettersToWord.get(sortLetters(randomWord)).size();
+        }
+
+        return randomWord;
     }
 }
