@@ -31,15 +31,18 @@ public class AnagramDictionary {
     private static final int MIN_NUM_ANAGRAMS = 5;
     private static final int DEFAULT_WORD_LENGTH = 3;
     private static final int MAX_WORD_LENGTH = 7;
+    private int wordLength = DEFAULT_WORD_LENGTH;
     private Random random = new Random();
     private ArrayList<String> wordList;
     private HashSet<String> wordSet;
     private HashMap<String, ArrayList> lettersToWord;
+    private HashMap<String, ArrayList> sizeToWords ;
 
     public AnagramDictionary(Reader reader) throws IOException {
         wordList = new ArrayList<>();
         wordSet = new HashSet<>();
         lettersToWord = new HashMap<>();
+        sizeToWords = new HashMap<>();
 
         BufferedReader in = new BufferedReader(reader);
         String line;
@@ -48,6 +51,18 @@ public class AnagramDictionary {
             wordList.add(word);
             wordSet.add(word);
 
+            // Track size of word
+            int wordLength = word.length();
+            if(sizeToWords.containsKey(wordLength)){
+                sizeToWords.get(wordLength).add(word);
+            }
+            else {
+                ArrayList<String> words = new ArrayList<>();
+                words.add(word);
+                sizeToWords.put(String.valueOf(wordLength), words);
+            }
+
+            // Add word to dictionary
             String sortedWord = sortLetters(word);
             if(!lettersToWord.containsKey(sortedWord))
             {
@@ -92,18 +107,17 @@ public class AnagramDictionary {
     }
 
     public String pickGoodStarterWord() {
-        int length = wordList.size();
-
-        Random rand = new Random();
-
-        int anagramLength = 0;
+        int anagramLength = MIN_NUM_ANAGRAMS + 1;
+        int randomWordLength = wordLength + 1;
         String randomWord = "";
-        while(anagramLength < MIN_NUM_ANAGRAMS) {
-            int index = rand.nextInt(length);
-            randomWord = wordList.get(index);
+        while(anagramLength > MIN_NUM_ANAGRAMS || randomWordLength > wordLength) {
+            ArrayList<String> stringArrayList = sizeToWords.get(String.valueOf(wordLength));
+            int index = random.nextInt(stringArrayList.size());
+            randomWord = stringArrayList.get(index);
+            randomWordLength = randomWord.length();
             anagramLength = lettersToWord.get(sortLetters(randomWord)).size();
         }
-
+        wordLength++;
         return randomWord;
     }
 }
